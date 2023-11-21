@@ -24,6 +24,10 @@
 <script>
 import FormTag from "@/components/FormTag.vue";
 import TextInput from "@/components/forms/TextInput.vue";
+import { store } from "@/store/store.js";
+import router from "@/router/index.js";
+import notie from "notie";
+import Security from "@/helpers/security.js";
 
 export default {
   name: "LoginView",
@@ -35,29 +39,53 @@ export default {
     return {
       email: "",
       password: "",
+      store,
     };
   },
   methods: {
     async submitHandler() {
-      console.log("submitHandler called - success!");
-
       const payload = {
         email: this.email,
         password: this.password,
       };
 
-      const requestOptions = {
-        method: "POST",
-        body: JSON.stringify(payload),
-      };
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/users/login`,
+        Security.requestOptions(payload),
+      );
+      const respData = await response.json();
 
-      const response = await fetch("http://localhost:8081/users/login", requestOptions);
-      const data = await response.json();
-
-      if (data.error) {
-        console.log("Error:", data.message);
+      if (respData.error) {
+        notie.alert({
+          type: "error",
+          text: respData.message,
+          // stay: true
+          // position: 'bottom'
+        });
       } else {
-        console.log(data);
+        store.token = respData.data.token.token;
+
+        store.user = {
+          id: respData.data.user.id,
+          first_name: respData.data.user.first_name,
+          last_name: respData.data.user.last_name,
+          email: respData.data.user.email,
+        };
+
+        // save info to cookie
+        let date = new Date();
+        let expDays = 1;
+        date.setTime(date.getTime() + expDays * 24 * 60 * 60 * 1000);
+        const expires = "expires=" + date.toUTCString();
+
+        // set the cookie
+        document.cookie =
+          "_site_data=" +
+          JSON.stringify(respData.data) +
+          "; " +
+          expires +
+          "; path=/; SameSite=strict; Secure;";
+        router.push("/");
       }
     },
   },
