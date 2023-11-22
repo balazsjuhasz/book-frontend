@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import FormTag from "@/components/FormTag.vue";
+import FormTag from "@/components/forms/FormTag.vue";
 import TextInput from "@/components/forms/TextInput.vue";
 import { store } from "@/store/store.js";
 import router from "@/router/index.js";

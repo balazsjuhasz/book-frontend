@@ -7,3 +7,14 @@
     </div>
   </div>
 </template>
+
+<script>
+import Security from "@/helpers/security.js";
+
+export default {
+  name: "BookListAdminView",
+  beforeMount() {
+    Security.requireToken();
+  },
+};
+</script>
